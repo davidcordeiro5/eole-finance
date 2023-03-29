@@ -5,9 +5,9 @@ export function Account() {
   const { data: ensName } = useEnsName({ address })
 
   return (
-    <div>
+    <p>
       {ensName ?? address}
       {ensName ? ` (${address})` : null}
-    </div>
+    </p>
   )
 }

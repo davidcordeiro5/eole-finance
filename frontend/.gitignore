@@ -10,13 +10,10 @@
 
 /coverage
 
-# vite
+# next.js
 
-"files": [
-  "dist/**/*",
-],
-dist
-dist-ssr
+/.next/
+/out/
 
 # production
 
@@ -26,7 +23,6 @@ dist-ssr
 
 .DS_Store
 \*.pem
-*.local
 
 # debug
 

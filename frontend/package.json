@@ -1,31 +1,27 @@
 {
-  "name": "frontend",
+  "name": "next-rainbowkit",
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
-    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
-    "@gnosis.pm/safe-apps-wagmi": "^2.1.0",
     "@rainbow-me/rainbowkit": "~0.12.1",
-    "@wagmi/core": "^0.10.7",
-    "buffer": "^6.0.3",
-    "ethers": "^5.7.2",
-    "process": "^0.11.10",
+    "ethers": "^5.7.0",
+    "next": "^13.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "util": "^0.12.4",
     "wagmi": "~0.12.0"
   },
   "devDependencies": {
+    "@types/node": "^17.0.31",
     "@types/react": "^18.0.9",
     "@types/react-dom": "^18.0.3",
-    "@vitejs/plugin-react": "^2.1.0",
-    "rollup-plugin-commonjs": "^10.1.0",
-    "typescript": "^4.9.4",
-    "vite": "^3.1.8"
+    "eslint": "^8.15.0",
+    "eslint-config-next": "^12.1.6",
+    "typescript": "^4.9.4"
   }
 }
