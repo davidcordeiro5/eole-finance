@@ -12,6 +12,9 @@
 
 # vite
 
+"files": [
+  "dist/**/*",
+],
 dist
 dist-ssr
 
