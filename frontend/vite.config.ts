@@ -16,6 +16,7 @@ export default defineConfig({
     },
   },
   build: {
+    outDir: "build",
     rollupOptions: {
       external: [
         "@safe-globalThis/safe-apps-provider",
