@@ -65,6 +65,12 @@ const Header = () => {
               pathnameRouter={router.pathname}
               label="Positions"
             />
+
+            <NavLink
+              pathname="/simple-storage"
+              pathnameRouter={router.pathname}
+              label="SimpleStorage (temp)"
+            />
           </>
         )}
       </HStack>
