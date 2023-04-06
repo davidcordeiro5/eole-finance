@@ -16,19 +16,9 @@ const getTheAbi = (pathName: string) => {
 };
 
 const eoleAbi = getTheAbi("../artifacts/contracts/Eole.sol/Eole.json");
-
 const xEoleAbi = getTheAbi("../artifacts/contracts/XEole.sol/XEole.json");
 
 async function main() {
-  // const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  // const unlockTime = currentTimestampInSeconds + 60;
-
-  // const lockedAmount = ethers.utils.parseEther("0.001");
-
-  // const Lock = await ethers.getContractFactory("Lock");
-  // const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
-  // await lock.deployed();
-
   const provider = new ethers.providers.JsonRpcProvider(
     "http://127.0.0.1:8545"
   );
@@ -40,6 +30,8 @@ async function main() {
   const vc = provider.getSigner(4);
   const feeVault = provider.getSigner(5);
 
+  /** Get address */
+  const userAddr = await user.getAddress();
   const teamAddress = await team.getAddress();
   const vcAddress = await vc.getAddress();
 
@@ -55,61 +47,62 @@ async function main() {
 
   await eole.setXEoleAddress(xEole.address);
 
-  console.log("eole     ", eole.address);
-  console.log("xEole    ", xEole.address);
-  console.log(" ");
+  console.log("*** ADDRESS ***");
+  console.log("| eole     ", eole.address);
+  console.log("| xEole    ", xEole.address);
+  console.log("*** ******* ***\n");
 
-  console.log("eole balance", await eole.balanceOf(owner.getAddress()));
-
-  console.log(" ");
-
+  // transfer the inflation reward to xEole contract (rewards for stakers)
   await eole.transferInflationReward(xEole.address);
-  console.log("xEole after transferInflationReward");
-  console.log("xEole balance of EOLE ", await eole.balanceOf(xEole.address));
-  // console.log("eole reaward", await eole.getTotalRewardDistributed());
-  console.log(" ");
-  await xEole.updateReceivedRewardForPool();
+  // await xEole.updateReceivedRewardForPool();
 
-  console.log(" ");
-
-  console.log(" ");
-  console.log(" ");
   /**
    * TEAM statement
+   * team address well put his token to stake
    */
-  console.log("TEAM statement ");
-
+  console.log("*** TEAM STATEMENT ***");
+  console.log("| TEAM", teamAddress);
   const eoleFromTeam = new ethers.Contract(eole.address, eoleAbi, team);
   const xEoleFromTeam = new ethers.Contract(xEole.address, xEoleAbi, team);
   const teamEoleDeposit = await eole.balanceOf(team.getAddress());
   await eoleFromTeam.approve(xEoleFromTeam.address, teamEoleDeposit);
+  console.log("| TEAM eole balance ", await eole.balanceOf(teamAddress));
+  console.log("| TEAM depositEole ");
   await xEoleFromTeam.depositEole(teamEoleDeposit);
-  console.log("TEAM eole balance ", await eole.balanceOf(teamAddress));
-  console.log("TEAM xEole balance", await xEoleFromTeam.balanceOf(teamAddress));
+  console.log("| TEAM new eole balance ", await eole.balanceOf(teamAddress));
+  console.log(
+    "| TEAM xEole balance",
+    await xEoleFromTeam.balanceOf(teamAddress)
+  );
+  console.log("| TEAM stakeXEole ");
   await xEoleFromTeam.stakeXEole(teamEoleDeposit);
-  console.log("TEAM xEole balance", await xEoleFromTeam.balanceOf(teamAddress));
-  console.log("TEAM xEole staked ", await xEoleFromTeam.getXEoleStaked());
-  console.log(" ");
-  console.log(" ");
+  console.log(
+    "| TEAM xEole balance",
+    await xEoleFromTeam.balanceOf(teamAddress)
+  );
+  console.log("| TEAM xEole staked ", await xEoleFromTeam.getXEoleStaked());
+  console.log("*** ************** ***\n");
 
   /**
    * VC's statement
+   * vc's address well put his token to stake
    */
-  console.log("VC statement ", vcAddress);
+  console.log("*** VC STATEMENT ***");
+  console.log("| VC", vcAddress);
   const eoleFromVc = new ethers.Contract(eole.address, eoleAbi, vc);
   const xEoleFromVc = new ethers.Contract(xEole.address, xEoleAbi, vc);
   const vcEoleDeposit = await eole.balanceOf(vcAddress);
   await eoleFromVc.approve(xEoleFromVc.address, vcEoleDeposit);
+  console.log("| VC eole balance ", await eole.balanceOf(vcAddress));
+  console.log("| VC depositEole");
   await xEoleFromVc.depositEole(vcEoleDeposit);
-  console.log("VC eole balance ", await eole.balanceOf(vcAddress));
-  console.log("VC xEole balance", await xEoleFromVc.balanceOf(vcAddress));
+  console.log("| VC eole balance ", await eole.balanceOf(vcAddress));
+  console.log("| VC xEole balance", await xEoleFromVc.balanceOf(vcAddress));
+  console.log("| VC stakeXEole ");
   await xEoleFromVc.stakeXEole(vcEoleDeposit);
-  console.log("VC xEole balance", await xEoleFromVc.balanceOf(vcAddress));
-  console.log("VC xEole staked ", await xEoleFromVc.getXEoleStaked());
-
-  console.log("vcEoleDeposit", vcEoleDeposit);
-  console.log(" ");
-  console.log(" ");
+  console.log("| VC xEole balance", await xEoleFromVc.balanceOf(vcAddress));
+  console.log("| VC xEole staked ", await xEoleFromVc.getXEoleStaked());
+  console.log("*** ************ **\n");
 
   /**
    * USER statement
@@ -118,7 +111,6 @@ async function main() {
   console.log("USER statement ");
   const eoleFromUser = new ethers.Contract(eole.address, eoleAbi, user);
   const xEoleFromUser = new ethers.Contract(xEole.address, xEoleAbi, user);
-  const userAddr = await user.getAddress();
 
   const userDepositAmount = ethers.utils.parseEther("10000");
 

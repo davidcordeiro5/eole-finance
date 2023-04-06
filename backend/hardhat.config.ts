@@ -8,9 +8,13 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY || "";
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   networks: {
+    hardhat: {
+      allowUnlimitedContractSize: true,
+    },
     localhost: {
       url: "http://127.0.0.1:8545",
       chainId: 31337,
+      allowUnlimitedContractSize: true,
     },
     arbitrumGoerli: {
       url: `https://arb-goerli.g.alchemy.com/v2/${ALCHEMY_KEY}`,
