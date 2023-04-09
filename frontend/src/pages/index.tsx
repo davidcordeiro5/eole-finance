@@ -1,17 +1,19 @@
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount } from "wagmi";
-
-import { Account } from "../components/Account";
 import Layout from "../components/Layout";
+import { Text } from "@chakra-ui/react";
 
 function Page() {
-  const { isConnected } = useAccount();
   return (
     <Layout>
-      {/* <h1>wagmi + RainbowKit + Next.js</h1> */}
-
-      {/* <ConnectButton /> */}
-      {/* {isConnected && <Account />} */}
+      <Text
+        m="auto"
+        alignSelf="center"
+        bgGradient="linear(to-l, #447e99, #b8dcff)"
+        bgClip="text"
+        fontSize="6xl"
+        fontWeight="extrabold"
+      >
+        Wellcom to Eole Finance !
+      </Text>
     </Layout>
   );
 }

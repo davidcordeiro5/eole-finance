@@ -8,7 +8,7 @@ import React, { FC } from "react";
 
 type InfoBoxProps = {
   title?: string;
-  description: string;
+  description?: string;
 };
 
 export const InfoBoxError: FC<InfoBoxProps> = ({ description, title }) => {
