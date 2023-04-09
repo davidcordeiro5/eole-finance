@@ -1,6 +1,6 @@
 import Layout from "../../components/Layout";
 import { Flex } from "@chakra-ui/layout";
-import { Button, Text } from "@chakra-ui/react";
+import { Text } from "@chakra-ui/react";
 import { useSigner } from "wagmi";
 import { caEole, eoleAbi } from "../../constants";
 import { ethers } from "ethers";

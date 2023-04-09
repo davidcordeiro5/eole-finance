@@ -49,15 +49,6 @@ const TokenBalance: FC<EoleBalanceProps> = ({
   useContractEvent({
     address: caEole,
     abi: eoleAbi,
-    eventName: "FaucetUsed",
-    listener() {
-      refetch();
-    },
-  });
-
-  useContractEvent({
-    address: caEole,
-    abi: eoleAbi,
     eventName: "Approval",
     listener() {
       refetch();
