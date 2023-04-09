@@ -33,6 +33,7 @@ import { caEole, caXEole } from "../../constants/contractAddress";
 import { xEoleAbi } from "../../constants/abi";
 import { BNToEtherString } from "../../utils/BNToEtherString";
 import { successToast, errorToast } from "../../utils/toasts";
+import { numberFixed } from "../../utils/numberFixed";
 
 const Dashboard = () => {
   const { address } = useAccount();
@@ -44,8 +45,11 @@ const Dashboard = () => {
   const [eDeposit, setEDeposit] = useState<string>("--");
   const [xEEarned, setXEEarned] = useState<string>("--");
   const [xEoleStaked, setXEoleStaked] = useState<string>("--");
+  const [unlockedTokenEarned, setUnlockedTokenEarned] = useState<string>("--");
 
   const [unlockAutorized, setUnlockAutorized] = useState<boolean>(false);
+
+  console.log("unlockAutorized", unlockAutorized);
 
   const contract = useContract({
     address: caXEole,
@@ -86,7 +90,16 @@ const Dashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contract]);
 
-  // getEoleDeposit;
+  useEffect(() => {
+    if (!contract || !unlockAutorized) return;
+    const waitFunction = async () => {
+      await getUnlockedTokenPerSec();
+    };
+
+    waitFunction();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contract, unlockAutorized]);
+
   const getEoleDeposit = async () => {
     try {
       if (!contract) return;
@@ -97,7 +110,6 @@ const Dashboard = () => {
     }
   };
 
-  // getXEoleStaked;
   const getXEoleStaked = async () => {
     try {
       if (!contract) return;
@@ -108,7 +120,6 @@ const Dashboard = () => {
     }
   };
 
-  // getRewardEarned;
   const getRewardEarned = async () => {
     if (!contract) return;
     try {
@@ -118,6 +129,18 @@ const Dashboard = () => {
       console.log("getXEoleStaked error", error);
     }
   };
+
+  const getUnlockedTokenPerSec = async () => {
+    if (!contract || !unlockAutorized) return;
+    try {
+      const unclockToken = await contract.getUnlockedTokenPerSec();
+      setUnlockedTokenEarned(BNToEtherString(unclockToken));
+    } catch (error) {
+      console.log("getXEoleStaked error", error);
+    }
+  };
+
+  console.log("unlockedTokenEarned", unlockedTokenEarned);
 
   const getUnlockEoleAutorize = async () => {
     try {
@@ -138,6 +161,18 @@ const Dashboard = () => {
     } catch (error) {
       console.log("getXEoleStaked error", error);
       errorToast(toast, "Error with compounding");
+    }
+  };
+
+  const claimEole = async () => {
+    if (!contract || !unlockAutorized) return;
+    try {
+      const tx = await contract.claim();
+      await tx.wait();
+      successToast(toast, "claim done");
+    } catch (error) {
+      console.log("claim error", error);
+      errorToast(toast, "Error with claim");
     }
   };
 
@@ -176,19 +211,21 @@ const Dashboard = () => {
                   />
                 </Td>
                 <Td>
-                  <Text as="kbd">{eDeposit}</Text>
+                  <Text as="kbd">{numberFixed(eDeposit, 5)}</Text>
                 </Td>
                 <Td>
-                  <Text as="kbd">{eoleToken.data?.formatted}</Text>
+                  <Text as="kbd">
+                    {numberFixed(eoleToken.data?.formatted, 5)}
+                  </Text>
                 </Td>
                 <Td isNumeric>
-                  <Text as="kbd">0.0</Text>
+                  <Text as="kbd">{numberFixed(unlockedTokenEarned, 5)}</Text>
                 </Td>
                 <Td isNumeric>
                   {" "}
                   <Button
                     isDisabled={!unlockAutorized}
-                    onClick={() => {}}
+                    onClick={claimEole}
                     colorScheme="blue"
                     h="1.75rem"
                     size="sm"
@@ -206,17 +243,20 @@ const Dashboard = () => {
                   />
                 </Td>
                 <Td>
-                  <Text as="kbd">{xEoleStaked}</Text>
+                  <Text as="kbd">{numberFixed(xEoleStaked, 5)}</Text>
                 </Td>
                 <Td>
-                  <Text as="kbd">{xEoleToken.data?.formatted}</Text>
+                  <Text as="kbd">
+                    {numberFixed(xEoleToken.data?.formatted, 5)}
+                  </Text>
                 </Td>
                 <Td isNumeric>
-                  <Text as="kbd">{xEEarned}</Text>
+                  <Text as="kbd">{numberFixed(xEEarned, 5)}</Text>
                 </Td>
                 <Td isNumeric>
                   {" "}
                   <Button
+                    isDisabled={Number(xEoleStaked) <= 0}
                     onClick={compoundXEole}
                     colorScheme="blue"
                     h="1.75rem"

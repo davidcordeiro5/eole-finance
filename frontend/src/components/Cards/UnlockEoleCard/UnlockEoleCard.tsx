@@ -11,6 +11,7 @@ type Props = {
   onSubmit: () => void;
   amountReceived?: number;
   slashed?: boolean;
+  isDisabled?: boolean;
 };
 
 const UnlockEoleCard: FC<Props> = ({
@@ -20,31 +21,38 @@ const UnlockEoleCard: FC<Props> = ({
   onSubmit,
   info,
   slashed,
+  isDisabled,
 }) => {
   return (
     <CardContainer title={title}>
       <VStack mt="16px" width="100%" h="100%" justifyContent="space-between">
-        <WarningBox title={info} />
-
-        <VStack style={{ marginTop: 32 }} width="100%">
-          <Flex alignItems="start" width="100%">
-            <Text>
-              You will receive in a linear way token during
-              <Highlight
-                query={`${amountReceived}`}
-                styles={{ color: "#FFF", py: "1", fontWeight: "bold" }}
-              >
-                {` ${amountReceived} `}
-              </Highlight>
-              {slashed ? "30" : "180"} days
-            </Text>
-          </Flex>
-          <SubmitButton
-            style={{ width: "100%" }}
-            label={buttonLabel}
-            onClick={onSubmit}
-          />
-        </VStack>
+        {isDisabled ? (
+          <Text>Your can't unlock eole for now</Text>
+        ) : (
+          <>
+            <WarningBox title={info} />
+            <VStack style={{ marginTop: 32 }} width="100%">
+              <Flex alignItems="start" width="100%">
+                <Text>
+                  You will receive in a linear way token during
+                  <Highlight
+                    query={`${amountReceived}`}
+                    styles={{ color: "#FFF", py: "1", fontWeight: "bold" }}
+                  >
+                    {` ${amountReceived} `}
+                  </Highlight>
+                  {slashed ? "30" : "180"} days
+                </Text>
+              </Flex>
+              <SubmitButton
+                isDisabled={isDisabled}
+                style={{ width: "100%" }}
+                label={buttonLabel}
+                onClick={onSubmit}
+              />
+            </VStack>
+          </>
+        )}
       </VStack>
     </CardContainer>
   );

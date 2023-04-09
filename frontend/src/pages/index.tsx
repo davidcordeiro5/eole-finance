@@ -12,7 +12,7 @@ function Page() {
         fontSize="6xl"
         fontWeight="extrabold"
       >
-        Wellcom to Eole Finance !
+        Welcome to Eole Finance !
       </Text>
     </Layout>
   );
