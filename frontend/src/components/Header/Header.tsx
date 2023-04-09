@@ -41,12 +41,11 @@ const Header = () => {
     <Flex w="100%" justifyContent="space-between" alignItems="center" p="8px 0">
       <HStack spacing="24px">
         <Image
-          style={{ cursor: "pointer" }}
+          priority
+          style={{ cursor: "pointer", width: 110, height: 60 }}
           onClick={() => router.push("/")}
           src={EoleImage}
           alt="Eole logo"
-          width={110}
-          height={80}
         />
         {router.pathname !== "/" && (
           <>
@@ -56,20 +55,19 @@ const Header = () => {
               label="Stake"
             />
             <NavLink
+              pathname="/dashboard"
+              pathnameRouter={router.pathname}
+              label="Dashboard"
+            />
+            <NavLink
+              pathname="/unlock-eole"
+              pathnameRouter={router.pathname}
+              label="Unlock eole"
+            />
+            <NavLink
               pathname="/vaults"
               pathnameRouter={router.pathname}
               label="Vaults"
-            />
-            <NavLink
-              pathname="/positions"
-              pathnameRouter={router.pathname}
-              label="Positions"
-            />
-
-            <NavLink
-              pathname="/simple-storage"
-              pathnameRouter={router.pathname}
-              label="SimpleStorage (temp)"
             />
           </>
         )}
@@ -80,7 +78,7 @@ const Header = () => {
             smallScreen: true,
             largeScreen: false,
           }}
-          chainStatus="none"
+          // chainStatus="none"
         />
       ) : (
         <Button

@@ -13,7 +13,14 @@ const Layout: FC<LayoutProps> = ({ children, headTitle }) => {
       <NextHead>
         <title>{headTitle ? headTitle : "Eole finance"}</title>
       </NextHead>
-      <Flex direction="column" maxW="1100px" w="100%" m="auto" p="0 16px">
+      <Flex
+        direction="column"
+        maxW="1100px"
+        minH="100vh"
+        w="100%"
+        m="auto"
+        p="0 16px"
+      >
         <Header />
         {children}
       </Flex>

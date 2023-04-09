@@ -1,3 +1,4 @@
+import { time } from "@nomicfoundation/hardhat-network-helpers";
 import { ethers } from "hardhat";
 import fs from "fs";
 import path from "path";
@@ -120,7 +121,7 @@ async function main() {
   const xEoleFromUser = new ethers.Contract(xEole.address, xEoleAbi, user);
   const userAddr = await user.getAddress();
 
-  const userDepositAmount = ethers.utils.parseEther("10000");
+  const userDepositAmount = ethers.utils.parseEther("30");
 
   // faucet Eole
   await eoleFromUser.faucet(userDepositAmount);
@@ -142,66 +143,94 @@ async function main() {
   console.log("XEole total supply", await xEole.balanceOf(xEole.address));
   console.log(" ");
   console.log(" ");
-  console.log("USER xEOLE staked", await xEoleFromUser.getXEoleStaked());
-  console.log(
-    "USER share of pool ",
-    (await xEoleFromUser.getShardOfPool()) / 1e18
+  const exStaked = ethers.utils.formatUnits(
+    await xEoleFromUser.getXEoleStaked(),
+    18
   );
-  console.log(
-    "USER Daily Reward ",
-    (await xEoleFromUser.getDailyReward()) / 1e18
+  console.log("USER xEOLE staked", exStaked);
+  const sOP = ethers.utils.formatUnits(
+    await xEoleFromUser.getShardOfPool(),
+    18
   );
-  console.log(
-    "USER Reward per s ",
-    (await xEoleFromUser.getRewardPerSecond()) / 1e18
+  const dailyR = ethers.utils.formatUnits(
+    await xEoleFromUser.getDailyReward(),
+    18
   );
+  const dailyRps = ethers.utils.formatUnits(
+    await xEoleFromUser.getRewardPerSecond(),
+    18
+  );
+
+  const rewardEarnedFormat = ethers.utils.formatUnits(
+    await xEoleFromUser.getRewardEarned(),
+    18
+  );
+
+  console.log(
+    "getUserStartStakeAt ",
+    await xEoleFromUser.getUserStartStakeAt()
+  );
+
+  await ethers.provider.send("evm_increaseTime", [3600]);
+  await ethers.provider.send("evm_mine", []); // this one will have 02:00 PM as its timestamp
+  await time.increase(360);
+  // await evm.advanceTime(10);
+
+  console.log("getUserUpdateAt ", await xEoleFromUser.getUserUpdateAt());
+  console.log("getTimestamp ", await xEoleFromUser.getTimestamp());
+  console.log("USER SoP ICI !!! ", sOP);
+  console.log("USER Daily Reward ", dailyR);
+  console.log("USER Reward per s ", dailyRps);
+  console.log("USER rewardEarnedFormat", rewardEarnedFormat);
+  console.log("USER Reward BN", await xEoleFromUser.getRewardEarned());
+  console.log("xEole Balance", await xEole.totalSupply());
   console.log(" ");
   console.log("TEAM xEOLE staked", await xEoleFromTeam.getXEoleStaked());
-  console.log(
-    "TEAM share of pool ",
-    (await xEoleFromTeam.getShardOfPool()) / 1e18
-  );
+  console.log("TEAM share of pool ", await xEoleFromTeam.getShardOfPool());
   console.log("TEAM Daily Reward ", await xEoleFromTeam.getDailyReward());
   console.log("TEAM Reward per s ", await xEoleFromTeam.getRewardPerSecond());
   console.log(" ");
-  console.log("VC xEOLE staked", (await xEoleFromVc.getXEoleStaked()) / 1e18);
-  console.log("VC share of pool ", (await xEoleFromVc.getShardOfPool()) / 1e18);
-  console.log("VC Daily Reward ", (await xEoleFromVc.getDailyReward()) / 1e18);
-  console.log(
-    "VS Reward per s ",
-    (await xEoleFromVc.getRewardPerSecond()) / 1e18
+  console.log("VC xEOLE staked", await xEoleFromVc.getXEoleStaked());
+  const shareOfPool = ethers.utils.formatUnits(
+    await xEoleFromVc.getShardOfPool(),
+    18
   );
-  console.log("getRewardEarned", (await xEoleFromVc.getRewardEarned()) / 1e18);
+  console.log("VC share of pool ", shareOfPool);
+  console.log("VC Daily Reward ", await xEoleFromVc.getDailyReward());
+  console.log("VS Reward per s ", await xEoleFromVc.getRewardPerSecond());
+  console.log("getRewardEarned", await xEoleFromVc.getRewardEarned());
 
-  // console.log(" ");
-  // console.log(" ");
   console.log("VC xEOLE staked", await xEoleFromVc.getXEoleStaked());
-  // await xEoleFromVc.compound();
-  console.log("VC xEOLE staked", await xEoleFromVc.getXEoleStaked());
+  await xEoleFromVc.compound();
+  console.log("VC xEOLE staked compounded", await xEoleFromVc.getXEoleStaked());
 
   console.log(" ");
 
-  console.log("xEole Balance", await xEole.totalSupply());
-  await xEoleFromVc.unlockEole(0);
+  await xEoleFromVc.unlockEole(1);
   // await xEoleFromVc.unlockEole(0);
-  console.log("VC balanceOf exole", await xEoleFromVc.balanceOf(vcAddress));
+  console.log("VC xEOLE staked", await xEoleFromVc.getXEoleStaked());
 
-  console.log("feeVault eole", await eole.balanceOf(feeVault.getAddress()));
+  console.log("VC EOLE staked", await xEoleFromVc.getEoleDeposit());
+  await xEoleFromVc.claim();
+  console.log("VC EOLE staked", await xEoleFromVc.getEoleDeposit());
+  console.log("VC EOLE balance", await eole.balanceOf(vcAddress));
+  await xEoleFromVc.claim();
+  console.log("VC EOLE staked", (await xEoleFromVc.getEoleDeposit()) / 1e18);
+  console.log(" ");
+  const eBalanceForVs = ethers.utils.formatUnits(
+    await eole.balanceOf(vcAddress),
+    18
+  );
+  console.log("VC e Balance For Vs", eBalanceForVs);
+  const tts = ethers.utils.formatUnits(await xEole.totalSupply(), 18);
+  console.log("xEole tts", tts);
+  // console.log("feeVault eole", await eole.balanceOf(feeVault.getAddress()));
 
   // await xEoleFromVc.unlockEole(1);
 
   // provider.send("evm_increaseTime", [60]);
   // provider.send("evm_mine");
   console.log(" ");
-
-  console.log("VC EOLE staked", await xEoleFromVc.getEoleDeposit());
-  await xEoleFromVc.claim();
-  console.log("VC EOLE staked", (await xEoleFromVc.getEoleDeposit()) / 1e18);
-  console.log("VC EOLE balance", await eole.balanceOf(vcAddress));
-  await xEoleFromVc.claim();
-  console.log("VC EOLE staked", (await xEoleFromVc.getEoleDeposit()) / 1e18);
-  console.log("VC EOLE balance", await eole.balanceOf(vcAddress));
-  // await xEoleFromUser.withdrawXEole(amountXEoleToStake);
 
   // await xEole.depositEole(55);
 

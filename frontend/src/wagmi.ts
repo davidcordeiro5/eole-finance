@@ -11,7 +11,7 @@ const { chains, provider, webSocketProvider } = configureChains(
     arbitrumGoerli,
     hardhat,
     localhost,
-    ...(process.env.NODE_ENV === "development" ? [arbitrumGoerli] : []),
+    // ...(process.env.NODE_ENV === "development" ? [arbitrumGoerli] : []),
   ],
   [publicProvider(), alchemyProvider({ apiKey: ALCHEMY_ID })]
 );
@@ -22,7 +22,7 @@ const { connectors } = getDefaultWallets({
 });
 
 export const client = createClient({
-  autoConnect: false,
+  autoConnect: true,
   connectors,
   provider,
   webSocketProvider,

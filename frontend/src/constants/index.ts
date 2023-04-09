@@ -1,2 +1,2 @@
-export { abiArbitrumSimpleStorage } from "./abi";
-export { caArbitrumSimpleStorage } from "./contractAddress";
+export { abiArbitrumSimpleStorage, eoleAbi } from "./abi";
+export { caArbitrumSimpleStorage, caEole } from "./contractAddress";

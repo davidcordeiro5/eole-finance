@@ -11,35 +11,36 @@ import "./Eole.sol";
 
 contract XEole is ERC20, Ownable  {
   using SafeMath for uint;
-  
+
   struct Users {
     uint eoleStaked;
     uint xEoleStaked;
     uint reward;
-    uint startRewardStakingAt;
+    uint updateAt;
     uint startStakeAt;
     uint withdrawStakeAt;
     uint unlockTime;
+    uint8 unlockTimeEoleChooded;
     bool stopEarning;
   }
 
   Eole immutable eole;
-  
+
   uint constant TOTAL_SUPPLY = 1_000_000_000 * 1e18;
   uint receivedReward;
 
   address feeVaultAddress;
 
-
   mapping(address => Users) user;
-  mapping(address => uint) exBalance;
+  uint totalXEoleStaked;
 
   event XEoleMinted(address minter, uint amount);
+  event StakedXEole(address minter, uint amount);
   event Claim(address sender, uint amountTokenClaimed);
   event CompoundingReward(address sender, uint amount);
   event UnlockingEole(address sender, uint unlockStartAt, bool slashed, uint amount);
 
-  
+
 
   constructor(address _eoleToken, address _feeVaultAddress) ERC20("xEole", "xEOLE") {
     eole = Eole(_eoleToken);
@@ -64,13 +65,40 @@ contract XEole is ERC20, Ownable  {
     return user[msg.sender].xEoleStaked;
   }
 
+  function getUserReaward () external view returns(uint) {
+    return user[msg.sender].reward;
+  }
+
+  function getUserStartStakeAt () external view returns(uint) {
+    return user[msg.sender].startStakeAt;
+  }
+
+  function getUserUpdateAt () external view returns(uint) {
+    return user[msg.sender].updateAt;
+  }
+
+  function getTimestamp () external view returns(uint) {
+    return block.timestamp;
+  }
+
+  function getUnlockTimeEoleChooded () external view returns(uint8) {
+    return user[msg.sender].unlockTimeEoleChooded;
+  }
+
+  function getUnlockEoleAutorize () external view returns(bool) {
+    return user[msg.sender].stopEarning;
+  }
+
   /// @notice Calculate the shard of pool of a Sender, mul by 1e18 to get small share. We need this result for the reward calcul
-  /// @dev The Alexandr N. Tetearing algorithm could increase precision
   /// @return ShardOfPool of the sender
   function getShardOfPool () public view returns (uint) {
     if (balanceOf(address(this)) == 0 || user[msg.sender].xEoleStaked == 0) {
       return 0;
     }
+
+    // return (user[msg.sender].xEoleStaked)
+    //   .div(balanceOf(address(this)))
+    //   .mul(1e18);
 
     return ((user[msg.sender].xEoleStaked)
       .mul(1e18))
@@ -88,13 +116,25 @@ contract XEole is ERC20, Ownable  {
     return getDailyReward() / 86400;
   }
 
+function getMin (uint _startDate, uint _endSate) private pure returns (uint) {
+    return _startDate < _endSate ? _startDate : _endSate;
+}
+
   function getRewardEarned () public view returns (uint) {
-    if (user[msg.sender].startRewardStakingAt == 0) {
+    if (user[msg.sender].startStakeAt == 0) {
       return 0;
+    } else if (user[msg.sender].updateAt == 0) {
+        return getRewardPerSecond()
+          .mul(block.timestamp - user[msg.sender].startStakeAt);
+    } else {
+        return getRewardPerSecond()
+          .mul(block.timestamp - user[msg.sender].updateAt);
+
     }
-    
-    return getRewardPerSecond()
-      .mul(block.timestamp - user[msg.sender].startRewardStakingAt);
+  }
+
+  function getTotalXEoleStaked () public view returns (uint) {
+    return  totalXEoleStaked;
   }
 
   function updateReceivedRewardForPool() external {
@@ -122,40 +162,31 @@ contract XEole is ERC20, Ownable  {
   function stakeXEole (uint _amount) external {
     require(_amount > 0, "You can stake 0 xEole");
     require(balanceOf(msg.sender) >= _amount, "Your balance is insufficient");
-    
+
     approve(msg.sender, _amount);
     require(transferFrom(msg.sender, address(this), _amount), "Transfer failed");
-    
-    user[msg.sender].startStakeAt = block.timestamp;
-    user[msg.sender].startRewardStakingAt = block.timestamp;
+
+    if (user[msg.sender].xEoleStaked <= 0) {
+      user[msg.sender].startStakeAt = block.timestamp;
+    } else {
+      user[msg.sender].updateAt = block.timestamp;
+    }
+
+    totalXEoleStaked += _amount;
     user[msg.sender].xEoleStaked += _amount;
+
+    emit StakedXEole(msg.sender, _amount);
   }
-
-  function withdrawXEole (uint _amount) external {
-    require(_amount > 0, "You have't xEole");
-    uint amount = user[msg.sender].xEoleStaked;
-    user[msg.sender].xEoleStaked = 0;
-
-    _transfer(address(this), msg.sender, amount);
-  }
-
-
-  // dailyReward eole.getXEoleRewardRate()div(365)
-  // userSharedOfPool =  (user balance / thisBalance) * 100
-
-  // userDailyRward =  (dailyReward * userSharedOfPool) / 100;
-  // userAPR =  (userDailyRward / user balance) * 100;
-  // userRewardPerSec = userAPR / 86400
-  
-  // userRewardPerSec * (currentTimeStamp - StartedAt);
-
-
 
   function compound () public {
     if (!user[msg.sender].stopEarning) {
       uint currentReward = getRewardEarned();
-      user[msg.sender].startRewardStakingAt = block.timestamp;
+      require(currentReward > 0, "Not reward");
+
+      user[msg.sender].updateAt = block.timestamp;
       user[msg.sender].xEoleStaked += currentReward;
+      totalXEoleStaked += currentReward;
+
 
       emit CompoundingReward(msg.sender, currentReward);
     }
@@ -169,23 +200,24 @@ contract XEole is ERC20, Ownable  {
     require(user[msg.sender].xEoleStaked > 0, "Your stake is empty");
 
     compound();
-    
+
     user[msg.sender].stopEarning = true;
-    
+
     uint monthInSeconde = 30 * 24 * 60 * 60;
     uint sixMonthInSeconde = monthInSeconde.mul(6);
 
     uint xEoleAmount = user[msg.sender].xEoleStaked;
-    
+
     // lockTimeChoosed === 0 ? unclockTime well be 30 days
     // with 5O% of stake slash
     if (lockTimeChoosed == 0) {
       user[msg.sender].unlockTime = block.timestamp + monthInSeconde;
       _burn(address(this), xEoleAmount);
-      
+
       uint slash = xEoleAmount.div(2);
       user[msg.sender].xEoleStaked = 0;
       user[msg.sender].eoleStaked = slash;
+      totalXEoleStaked -= xEoleAmount;
       eole.transfer(feeVaultAddress, slash);
 
       emit UnlockingEole(msg.sender, block.timestamp, true, slash);
@@ -194,10 +226,11 @@ contract XEole is ERC20, Ownable  {
     } else if (lockTimeChoosed == 1) {
       user[msg.sender].unlockTime = block.timestamp + sixMonthInSeconde;
       _burn(address(this), xEoleAmount);
-      
+
       user[msg.sender].xEoleStaked = 0;
+      totalXEoleStaked -= xEoleAmount;
       user[msg.sender].eoleStaked = xEoleAmount;
-      
+
       emit UnlockingEole(msg.sender, block.timestamp, false, xEoleAmount);
     }
 
@@ -216,11 +249,12 @@ contract XEole is ERC20, Ownable  {
   }
 
   function claim () external  {
+    require(user[msg.sender].stopEarning, "Unlock Eole not started");
     require(user[msg.sender].eoleStaked > 0, "Nothing to claim");
     uint unlockedToken = getUnlockedTokenPerSec();
 
     user[msg.sender].eoleStaked -= unlockedToken;
-     
+
     eole.transfer(msg.sender, unlockedToken);
     emit Claim(msg.sender, unlockedToken);
   }

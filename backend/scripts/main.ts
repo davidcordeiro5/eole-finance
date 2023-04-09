@@ -65,7 +65,7 @@ async function main() {
   const eoleFromTeam = new ethers.Contract(eole.address, eoleAbi, team);
   const xEoleFromTeam = new ethers.Contract(xEole.address, xEoleAbi, team);
   const teamEoleDeposit = await eole.balanceOf(team.getAddress());
-  await eoleFromTeam.approve(xEoleFromTeam.address, teamEoleDeposit);
+  await eoleFromTeam.approve(xEole.address, teamEoleDeposit);
   console.log("| TEAM eole balance ", await eole.balanceOf(teamAddress));
   console.log("| TEAM depositEole ");
   await xEoleFromTeam.depositEole(teamEoleDeposit);
@@ -104,10 +104,14 @@ async function main() {
   console.log("| VC xEole staked ", await xEoleFromVc.getXEoleStaked());
   console.log("*** ************ **\n");
 
+  const ttS = await xEoleFromVc.getTotalXEoleStaked();
+  console.log("ttS", ttS);
+
   /**
    * USER statement
    */
   // USER need to use eole SC and xEole SC
+  /*
   console.log("USER statement ");
   const eoleFromUser = new ethers.Contract(eole.address, eoleAbi, user);
   const xEoleFromUser = new ethers.Contract(xEole.address, xEoleAbi, user);
@@ -184,6 +188,7 @@ async function main() {
 
   // provider.send("evm_increaseTime", [60]);
   // provider.send("evm_mine");
+
   console.log(" ");
 
   console.log("VC EOLE staked", await xEoleFromVc.getEoleDeposit());
@@ -193,7 +198,8 @@ async function main() {
   await xEoleFromVc.claim();
   console.log("VC EOLE staked", (await xEoleFromVc.getEoleDeposit()) / 1e18);
   console.log("VC EOLE balance", await eole.balanceOf(vcAddress));
-  // await xEoleFromUser.withdrawXEole(amountXEoleToStake);
+
+  */
 
   // await xEole.depositEole(55);
 
@@ -215,9 +221,6 @@ async function main() {
   // console.log("eole team", await eole.balanceOf(team.getAddress()));
   // // const eoleContract = new ethers.Contract(eole.address, eoleAbi, sBob);
 
-  console.log(" ");
-  console.log(" ");
-  console.log(" ");
   console.log(" ");
   console.log("getXEoleRewardRate", await eole.getXEoleRewardRate());
   // console.log(

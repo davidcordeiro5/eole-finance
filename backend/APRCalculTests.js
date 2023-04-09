@@ -21,6 +21,13 @@ const getUserApr = (userStake, ttLockStake, incentive) => {
   return (useIncentive / userStake) * 100;
 };
 
+const getUserApr2 = (ttLockStake, incentive) => {
+  const userShareOfPoll = (11 / ttLockStake) * 100;
+
+  const useIncentive = (incentive * userShareOfPoll) / 100;
+  return (useIncentive / 11) * 100;
+};
+
 const numberTests = () => {
   const totalStacked = ONE_M * 230;
 
@@ -29,7 +36,7 @@ const numberTests = () => {
   console.log("yearlyIncentive 9% of COMMUNITY_SUPPLY", yearlyIncentive);
   const dailyIncentive = yearlyIncentive / 365; //            45205 daily
 
-  const mStake = totalStacked / 100;
+  const mStake = 30; // totalStacked / 10000;
 
   const mShareOfPoll = (mStake / totalStacked) * 100;
   const mShareOfPoll2 = (mStake * 100) / totalStacked;
@@ -38,6 +45,7 @@ const numberTests = () => {
 
   const mDailyIncentive = (dailyIncentive * mShareOfPoll) / 100;
 
+  console.log("mDailyIncentive", mDailyIncentive);
   const apr = (mDailyIncentive / mStake) * 100;
 
   // 86400 = 1 day
@@ -54,11 +62,12 @@ const numberTests = () => {
   );
 
   const xEolePoolAPR = (yearlyIncentive * 50) / 100;
+  console.log("xEolePoolAPR", xEolePoolAPR);
   const eUSDCPoolAPR = (yearlyIncentive * 30) / 100;
   const eVLPPoolAPR = (yearlyIncentive * 20) / 100;
   console.log("APR for 1% share of pool");
   console.log(
-    `xEole pool apr:  ~${getUserApr(100, totalStacked, xEolePoolAPR)}`
+    `xEole pool apr:  ~${getUserApr(30, totalStacked, xEolePoolAPR)}`
   );
   console.log(
     `eUSDC pool apr:  ~${getUserApr(100, totalStacked, eUSDCPoolAPR)}`
@@ -75,12 +84,19 @@ const numberTests = () => {
 
   const userApr = (dailyReward / mStake) * 100;
 
-  console.log("Test", (mStake / totalStacked) * 100);
+  // console.log("Test", (mStake / totalStacked) * 100);
 
-  console.log("getXEoleRewardRate", getXEoleRewardRate, dailyReward);
-  console.log("user APR", userApr);
+  // console.log("getXEoleRewardRate", getXEoleRewardRate, dailyReward);
 
-  console.log("time cal currentTimeStamp - StartedAt", 1680764360 - 1680764312);
+  const mStakeFN = 30;
+  const ttStakedBNToStrToFN = totalStacked + 30;
+  const userShareOfPoll = (mStakeFN / ttStakedBNToStrToFN) * 100;
+  const ttIncentive = (yearlyIncentive * 50) / 100;
+
+  const res = getUserApr(mStakeFN, ttStakedBNToStrToFN, ttIncentive);
+  console.log("res", res, getUserApr2(ttStakedBNToStrToFN, ttIncentive));
+
+  console.log("userShareOfPoll", userShareOfPoll);
 };
 
 numberTests();
