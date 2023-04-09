@@ -42,7 +42,7 @@ contract Eole is ERC20, Ownable {
   function setXEoleAddress (address _xEoleAddress) external onlyOwner {
     xEoleAddress = _xEoleAddress;
   }
-  
+
   function getInflationReward () internal pure returns(uint) {
     return COMU_ALLOCATION.mul(9).div(100);
   }
@@ -56,7 +56,7 @@ contract Eole is ERC20, Ownable {
     return rewardDistributed;
   }
 
-  function transferInflationReward(address _xEoleAddress) external oncePerYear onlyOwner {
+  function transferInflationReward(address _xEoleAddress) external oncePerYear onlyOwner payable {
     require(xEoleAddress != address(0), "Set xEole first");
     require(xEoleAddress == _xEoleAddress, "Bad xEole address");
     require(balanceOf(owner()) >= getInflationReward(), "Not enough tokens in the contract");
@@ -66,9 +66,9 @@ contract Eole is ERC20, Ownable {
     // 20 % of inflationReward for eVLP Vault
 
     rewardDistributed += getInflationReward();
-    
+
     _transfer(owner(), _xEoleAddress, getInflationReward());
-    
+
     emit TransferInflationReward(
       _xEoleAddress, block.timestamp, getInflationReward());
   }
@@ -76,7 +76,7 @@ contract Eole is ERC20, Ownable {
   function faucet(uint256 amount) public {
     require(amount > 0, "Amount should be greater than 0");
     require(balanceOf(owner()) >= amount, "Not enough tokens in the contract");
-    _transfer(owner(), msg.sender, amount); 
+    _transfer(owner(), msg.sender, amount);
     emit FaucetUsed(msg.sender, amount);
   }
 }
