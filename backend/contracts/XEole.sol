@@ -89,6 +89,10 @@ contract XEole is ERC20, Ownable  {
     return user[msg.sender].stopEarning;
   }
 
+  function getUnlockTime () external view returns(uint) {
+    return user[msg.sender].unlockTime;
+  }
+
   /// @notice Calculate the shard of pool of a Sender, mul by 1e18 to get small share. We need this result for the reward calcul
   /// @return ShardOfPool of the sender
   function getShardOfPool () public view returns (uint) {

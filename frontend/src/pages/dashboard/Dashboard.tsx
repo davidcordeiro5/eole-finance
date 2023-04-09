@@ -34,6 +34,7 @@ import { xEoleAbi } from "../../constants/abi";
 import { BNToEtherString } from "../../utils/BNToEtherString";
 import { successToast, errorToast } from "../../utils/toasts";
 import { numberFixed } from "../../utils/numberFixed";
+import bigNumberFormatUnits from "../../utils/bigNumberFormatUnits";
 
 const Dashboard = () => {
   const { address } = useAccount();
@@ -47,9 +48,7 @@ const Dashboard = () => {
   const [xEoleStaked, setXEoleStaked] = useState<string>("--");
   const [unlockedTokenEarned, setUnlockedTokenEarned] = useState<string>("--");
 
-  const [unlockAutorized, setUnlockAutorized] = useState<boolean>(false);
-
-  console.log("unlockAutorized", unlockAutorized);
+  const [unlockAutorized, setUnlockAutorized] = useState<boolean>();
 
   const contract = useContract({
     address: caXEole,
@@ -73,6 +72,34 @@ const Dashboard = () => {
     eventName: "CompoundingReward",
     listener() {
       xEoleToken.refetch();
+    },
+  });
+
+  useContractEvent({
+    address: caXEole,
+    abi: xEoleAbi,
+    eventName: "Claim",
+    listener(_, amount) {
+      const value = amount as any;
+      if (bigNumberFormatUnits(value) > 0) {
+        getEoleDeposit();
+        getXEoleStaked();
+        getRewardEarned();
+      }
+    },
+  });
+
+  useContractEvent({
+    address: caXEole,
+    abi: xEoleAbi,
+    eventName: "CompoundingReward",
+    listener(_, amount) {
+      const value = amount as any;
+      if (bigNumberFormatUnits(value) > 0) {
+        getEoleDeposit();
+        getXEoleStaked();
+        getRewardEarned();
+      }
     },
   });
 
@@ -139,8 +166,6 @@ const Dashboard = () => {
       console.log("getXEoleStaked error", error);
     }
   };
-
-  console.log("unlockedTokenEarned", unlockedTokenEarned);
 
   const getUnlockEoleAutorize = async () => {
     try {
@@ -222,7 +247,6 @@ const Dashboard = () => {
                   <Text as="kbd">{numberFixed(unlockedTokenEarned, 5)}</Text>
                 </Td>
                 <Td isNumeric>
-                  {" "}
                   <Button
                     isDisabled={!unlockAutorized}
                     onClick={claimEole}

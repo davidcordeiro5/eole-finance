@@ -111,11 +111,9 @@ const StakeXEole = () => {
 
       const ttStakedBN = await contract.getTotalXEoleStaked();
       const ttLockStake = bigNumberFormatUnits(ttStakedBN);
-      console.log("ttLockStake", ttLockStake);
 
       const resBN = await eoleSC.getTotalRewardDistributed();
       const incentive = bigNumberFormatUnits(resBN);
-      console.log("incentive", incentive);
 
       const userShareOfPoll = (1 / ttLockStake) * 100;
 

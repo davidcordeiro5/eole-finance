@@ -23,9 +23,6 @@ const Stake = () => {
 
   return (
     <Layout>
-      <Button colorScheme="blue" onClick={callFaucet}>
-        Faucet
-      </Button>
       <Text
         mb="32px"
         alignSelf="center"

@@ -27,7 +27,7 @@ const UnlockEoleCard: FC<Props> = ({
     <CardContainer title={title}>
       <VStack mt="16px" width="100%" h="100%" justifyContent="space-between">
         {isDisabled ? (
-          <Text>Your can't unlock eole for now</Text>
+          <Text>{"Your can't unlock eole for now"}</Text>
         ) : (
           <>
             <WarningBox title={info} />
