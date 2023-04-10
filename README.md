@@ -16,3 +16,6 @@ USDC faucet [here](https://staging.aave.com/faucet/?marketName=proto_arbitrum_go
 VIDEO:
 What is eole.finace [here](https://www.youtube.com/watch?v=L1FYcRUcAgo)
 How to use [here](https://www.youtube.com/watch?v=DkvbzCQCz90)
+
+coverage: 
+![Screenshot 2023-04-10 at 21 19 42](https://user-images.githubusercontent.com/22399185/230979752-fe42d66f-3f45-47b6-b05f-5a771499e411.png)
